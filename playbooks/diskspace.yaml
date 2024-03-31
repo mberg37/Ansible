@@ -9,4 +9,9 @@
 
     - name: Check disk space available
       shell: df -h / | awk 'NR==2 {print $5}'
-      register: disk_usage
+      register: disk_space_percentage
+
+    - name: Display disk space information
+      debug:
+        msg: "Disk space usage: {{ disk_usage.stdout }}"
+        verbosity: 0  # Optional: Set verbosity level if needed
