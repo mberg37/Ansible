@@ -1,11 +1,8 @@
 ---
 - hosts: all
-
-
-  become:true
-  
-  task:
-    - name update apt packages
+  become: true
+  tasks:
+    - name: Update apt packages
       apt:
         upgrade: yes
-        updatecache: yes
+        update_cache: yes
