@@ -1,5 +1,7 @@
 ---
 - hosts: all
+  ignore_errors: yes
+
   tasks:
     - name: Shutdown all servers
       become: yes
