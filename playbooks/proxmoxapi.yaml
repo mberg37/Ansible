@@ -1,1 +1,31 @@
+---
+- name: Ensure Proxmox VM creation
+  hosts: localhost
+  gather_facts: false
+  vars_prompt:
+    - name: proxmox_server_ip
+      prompt: "Enter the IP address or hostname of the Proxmox server"
+      private: no
+
+    - name: api_username
+      prompt: "Enter your Proxmox username"
+      private: no
+
+    - name: api_password
+      prompt: "Enter your Proxmox password"
+      private: yes
+
+  tasks:
+    - name: Create Proxmox VM
+      proxmox_kvm:
+        api_host: "{{ proxmox_server_ip }}"
+        api_user: "{{ api_username }}"
+        api_password: "{{ api_password }}"
+        node: "{{ proxmox_node }}"
+        vmid: "{{ proxmox_vm_id }}"
+        name: "{{ proxmox_vm_name }}"
+        cores: "{{ proxmox_vm_cores }}"
+        memory: "{{ proxmox_vm_memory }}"
+        proxmox_default_behavior: "{{ proxmox_default_behavior }}"
+        state: present
 
