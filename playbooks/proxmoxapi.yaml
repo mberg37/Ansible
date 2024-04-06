@@ -1,5 +1,5 @@
 ---
-- name: Ensure Proxmox VM creation
+- name: Check status of running VMs on Proxmox
   hosts: localhost
   gather_facts: false
   vars_prompt:
@@ -16,16 +16,17 @@
       private: yes
 
   tasks:
-    - name: Create Proxmox VM
+    - name: Get list of running VMs
       proxmox_kvm:
         api_host: "{{ proxmox_server_ip }}"
         api_user: "{{ api_username }}"
         api_password: "{{ api_password }}"
         node: "{{ proxmox_node }}"
-        vmid: "{{ proxmox_vm_id }}"
-        name: "{{ proxmox_vm_name }}"
-        cores: "{{ proxmox_vm_cores }}"
-        memory: "{{ proxmox_vm_memory }}"
-        proxmox_default_behavior: "{{ proxmox_default_behavior }}"
-        state: present
+        state: query
 
+      register: running_vms
+
+    - name: Print status of running VMs
+      debug:
+        msg: "VM {{ item.name }} is {{ item.status }}"
+      loop: "{{ running_vms.virtual_machines }}"
