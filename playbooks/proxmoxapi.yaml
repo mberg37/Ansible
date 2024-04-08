@@ -21,7 +21,7 @@
         api_host: "{{ proxmox_server_ip }}"
         api_user: "{{ api_username }}"
         api_password: "{{ api_password }}"
-        node: "{{ 192.168.137.99 }}"
+        node: "localhost"  # Assuming Proxmox is running on the same machine
         state: query
 
       register: running_vms
@@ -30,3 +30,4 @@
       debug:
         msg: "VM {{ item.name }} is {{ item.status }}"
       loop: "{{ running_vms.virtual_machines }}"
+
