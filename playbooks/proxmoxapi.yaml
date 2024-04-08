@@ -5,11 +5,19 @@
 
   vars:
     proxmox_server: localhost
-    proxmox_ssh_user: root
+
+  vars_prompt:
+    - name: proxmox_ssh_user
+      prompt: "Enter SSH username for Proxmox"
+      private: no
+
+    - name: proxmox_ssh_pass
+      prompt: "Enter SSH password for Proxmox"
+      private: yes
 
   tasks:
     - name: Attempt SSH connection to Proxmox node
-      ansible.builtin.shell: ssh {{ proxmox_ssh_user }}@{{ proxmox_server }} hostname
+      ansible.builtin.shell: sshpass -p {{ proxmox_ssh_pass }} ssh {{ proxmox_ssh_user }}@{{ proxmox_server }} hostname
       register: ssh_output
       ignore_errors: true
 
