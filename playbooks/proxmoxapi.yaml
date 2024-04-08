@@ -1,5 +1,5 @@
 ---
-- name: Check status of running VMs on Proxmox
+- name: Test connection to Proxmox node
   hosts: localhost
   gather_facts: false
   vars_prompt:
@@ -16,18 +16,15 @@
       private: yes
 
   tasks:
-    - name: Get list of running VMs
+    - name: Test connection
       proxmox_kvm:
         api_host: "{{ proxmox_server_ip }}"
         api_user: "{{ api_username }}"
         api_password: "{{ api_password }}"
-        node: "localhost"  # Assuming Proxmox is running on the same machine
+        node: "localhost"
         state: query
+      register: connection_test
 
-      register: running_vms
-
-    - name: Print status of running VMs
+    - name: Print connection test result
       debug:
-        msg: "VM {{ item.name }} is {{ item.status }}"
-      loop: "{{ running_vms.virtual_machines }}"
-
+        msg: "Connection test {{ 'succeeded' if connection_test.success else 'failed' }}"
