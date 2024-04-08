@@ -21,7 +21,7 @@
         api_host: "{{ proxmox_server_ip }}"
         api_user: "{{ api_username }}"
         api_password: "{{ api_password }}"
-        node: "{{ proxmox_node }}"
+        node: "{{ 192.168.137.99 }}"
         state: query
 
       register: running_vms
