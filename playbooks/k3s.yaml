@@ -1,1 +1,9 @@
 
+---
+- name: Ping K3s servers
+  hosts: k3s
+  gather_facts: false
+
+  tasks:
+    - name: Ping the servers
+      ping:
