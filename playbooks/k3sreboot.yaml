@@ -2,8 +2,12 @@
 - name: Reboot K3s servers
   hosts: k3s
   gather_facts: false
-  become: true  
+  become: true  # Ensure sudo privileges are used
   tasks:
     - name: Reboot the servers
       reboot:
         reboot_timeout: 300
+
+    - name: Confirm successful reboot
+      debug:
+        msg: "The server {{ inventory_hostname }} has successfully rebooted and is back online!"
