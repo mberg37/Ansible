@@ -3,20 +3,27 @@
   hosts: control_plane
   become: true
   vars:
-    k3s_version: "v1.31.3+k3s1"  # Specifik K3s-version
-    k3s_disable_components: "traefik"  # Komponenter der skal deaktiveres
+    k3s_version: "v1.31.3+k3s1"  # K3s version
+    k3s_disable_components: "traefik"  # Deaktiver Traefik
   tasks:
     - name: Install K3s on master node (disable Traefik)
       shell: |
-        curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION={{ k3s_version }} sh -s - --write-kubeconfig-mode 644 --disable {{ k3s_disable_components }}
-        echo "K3s installed on master node with Traefik disabled"
+        curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION={{ k3s_version }} sh -s - \
+        --write-kubeconfig-mode 644 --disable {{ k3s_disable_components }}
       args:
         warn: false
+      register: k3s_install_result
+      failed_when: k3s_install_result.rc != 0
+
+    - name: Debug installation output
+      debug:
+        var: k3s_install_result.stdout
 
     - name: Retrieve K3s token
       slurp:
         src: /var/lib/rancher/k3s/server/node-token
       register: k3s_token_data
+      failed_when: k3s_token_data is not defined
 
     - name: Set K3s token fact
       set_fact:
@@ -26,9 +33,20 @@
   hosts: workers
   become: true
   vars:
-    k3s_version: "v1.31.3+k3s1"  # Specifik K3s-version
-    k3s_disable_components: "traefik"  # Komponenter der skal deaktiveres
+    k3s_version: "v1.31.3+k3s1"
+    k3s_disable_components: "traefik"
   tasks:
     - name: Install K3s on worker node (disable Traefik)
       shell: |
-        curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION={{ k3s_version }}
+        curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION={{ k3s_version }} \
+        K3S_URL=https://{{ hostvars['control_plane']['ansible_host'] }}:6443 \
+        K3S_TOKEN={{ hostvars['control_plane']['k3s_token'] }} \
+        sh -s - --disable {{ k3s_disable_components }}
+      args:
+        warn: false
+      register: k3s_worker_install_result
+      failed_when: k3s_worker_install_result.rc != 0
+
+    - name: Debug worker installation output
+      debug:
+        var: k3s_worker_install_result.stdout
