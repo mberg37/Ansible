@@ -1,5 +1,5 @@
 ---
-- hosts: k4s
+- hosts: all
 
   tasks:
     - name: Ping all hosts
