@@ -1,0 +1,14 @@
+---
+- name: Shut down all K3s servers
+  hosts: k4s
+  gather_facts: false
+  become: true  # Run commands with sudo privileges
+
+  tasks:
+    - name: Shut down the server
+      command: /sbin/shutdown now
+      ignore_errors: true  # Ignore errors caused by SSH disconnects
+
+    - name: Confirm shutdown initiated
+      debug:
+        msg: "Shutdown initiated on {{ inventory_hostname }}. SSH may disconnect as the server powers off."
