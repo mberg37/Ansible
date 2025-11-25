@@ -1,5 +1,5 @@
 - name: Install Helm
-  hosts: local
+  hosts: k3s_master # Ensure this matches your inventory group for the master node
   become: yes
   tasks:
     - name: Install curl (if not already installed)
