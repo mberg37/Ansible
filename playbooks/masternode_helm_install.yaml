@@ -1,53 +1,27 @@
----
-- name: Install Helm on k3s Master Node
-  hosts: k3s_master
-  become: true
-  gather_facts: false
-
+- name: Install Helm
+  hosts: local
+  become: yes
   tasks:
-    - name: Ensure necessary packages (curl, tar) are installed
-      ansible.builtin.apt:
-        name:
-          - curl
-          - tar
+    - name: Install curl (if not already installed)
+      package:
+        name: curl
         state: present
-        update_cache: yes
-      when: ansible_os_family == "Debian"
-      tags:
-        - setup
-        - packages
 
     - name: Download Helm installation script
-      ansible.builtin.get_url:
-        url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+      get_url:
+        url: https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
         dest: /tmp/get_helm.sh
-        mode: '0700'
-      tags:
-        - setup
-        - helm
+        mode: '0755'
 
-    - name: Execute Helm installation script
-      ansible.builtin.command: /tmp/get_helm.sh
-      tags:
-        - setup
-        - helm
-
-    - name: Clean up Helm installation script
-      ansible.builtin.file:
-        path: /tmp/get_helm.sh
-        state: absent
-      tags:
-        - cleanup
-
-    - name: Verify Helm installation
-      ansible.builtin.command: helm version --client
-      register: helm_version_output
+    - name: Run Helm installation script
+      command: /tmp/get_helm.sh
+      args:
+        creates: /usr/local/bin/helm
+      register: helm_install_result
       changed_when: false
-      tags:
-        - verify
 
-    - name: Display Helm version
-      ansible.builtin.debug:
-        msg: "Helm installed: {{ helm_version_output.stdout }}"
-      tags:
-        - verify
+    - name: Add /usr/local/bin to PATH
+      lineinfile:
+        path: ~/.bashrc
+        line: 'export PATH=$PATH:/usr/local/bin'
+      when: helm_install_result.rc == 0
