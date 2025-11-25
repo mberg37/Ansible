@@ -1,0 +1,53 @@
+---
+- name: Install Helm on k3s Master Node
+  hosts: k3s_master
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Ensure necessary packages (curl, tar) are installed
+      ansible.builtin.apt:
+        name:
+          - curl
+          - tar
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+      tags:
+        - setup
+        - packages
+
+    - name: Download Helm installation script
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+        dest: /tmp/get_helm.sh
+        mode: '0700'
+      tags:
+        - setup
+        - helm
+
+    - name: Execute Helm installation script
+      ansible.builtin.command: /tmp/get_helm.sh
+      tags:
+        - setup
+        - helm
+
+    - name: Clean up Helm installation script
+      ansible.builtin.file:
+        path: /tmp/get_helm.sh
+        state: absent
+      tags:
+        - cleanup
+
+    - name: Verify Helm installation
+      ansible.builtin.command: helm version --client
+      register: helm_version_output
+      changed_when: false
+      tags:
+        - verify
+
+    - name: Display Helm version
+      ansible.builtin.debug:
+        msg: "Helm installed: {{ helm_version_output.stdout }}"
+      tags:
+        - verify
