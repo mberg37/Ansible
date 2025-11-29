@@ -1,0 +1,28 @@
+---
+- name: Deploy Traefik to k3s cluster
+  hosts: k3s_master
+  become: true
+  tasks:
+    - name: Add Traefik Helm repository
+      community.kubernetes.helm_repository:
+        name: traefik
+        repo_url: "https://helm.traefik.io/traefik"
+        state: present
+
+    - name: Create Traefik namespace
+      community.kubernetes.k8s:
+        name: traefik
+        api_version: v1
+        kind: Namespace
+        state: present
+
+    - name: Deploy Traefik with Helm using LoadBalancer service
+      community.kubernetes.helm:
+        name: traefik
+        chart_ref: traefik/traefik
+        release_namespace: traefik
+        create_namespace: true
+        wait: true
+        values:
+          service:
+            type: LoadBalancer
